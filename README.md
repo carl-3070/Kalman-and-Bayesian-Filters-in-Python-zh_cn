@@ -1,14 +1,15 @@
 # [Kalman and Bayesian Filters in Python](https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python)
 
+本项目是Kalman and Bayesian Filters in Python(https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python)的中文翻译，本人也是在一遍学习一遍翻译，如有错误还请谅解，如有能力还是建议直接阅读原文。
 
-Introductory text for Kalman and Bayesian filters. All code is written in Python, and the book itself is written using Juptyer Notebook so that you can run and modify the code in your browser. What better way to learn?
+本书主要介绍了卡尔曼和贝叶斯滤波器的原理和用法。文中的所有代码都是用Python编写的，本书本身是使用Juptyer Notebook编写的，因此您可以在浏览器中运行和修改代码。 还有什么比这更好的学习方法吗！
 
 
-**"Kalman and Bayesian Filters in Python" looks amazing! ... your book is just what I needed** - Allen Downey, Professor and O'Reilly author.
+**"Kalman and Bayesian Filters in Python" looks amazing! ... your book is just what I needed** -  and O'Reilly作者，Allen Downey教授.
 
 **Thanks for all your work on publishing your introductory text on Kalman Filtering, as well as the Python Kalman Filtering libraries. We’ve been using it internally to teach some key state estimation concepts to folks and it’s been a huge help.** - Sam Rodkey, SpaceX
 
-Start reading online now by clicking the binder or Azure badge below:
+原文支持binder和Azure badge的线上阅读:
 
 
 [![Binder](http://mybinder.org/badge.svg)](https://beta.mybinder.org/v2/gh/rlabbe/Kalman-and-Bayesian-Filters-in-Python/master)
@@ -18,18 +19,30 @@ Start reading online now by clicking the binder or Azure badge below:
 
 ![alt tag](https://raw.githubusercontent.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python/master/animations/05_dog_track.gif)
 
-What are Kalman and Bayesian Filters?
+什么是卡尔曼和贝叶斯滤波器？
 -----
 
+所有的传感器都会带来噪声。我们所在的世界充满了我们想要测量的数据和跟踪事件，但我们不能依靠传感器来为我们提供完美的信息。我车里的GPS可以报告高度。每当我通过某条道路上的同一个地方的时候，它报告的高度总会略有不同。如果我用厨房里的秤称同一个物体称重两次，每次称的重量也会不同。
 Sensors are noisy. The world is full of data and events that we want to measure and track, but we cannot rely on sensors to give us perfect information. The GPS in my car reports altitude. Each time I pass the same point in the road it reports a slightly different altitude. My kitchen scale gives me different readings if I weigh the same object twice.
+
+在简单的情况下，有很简单的解决方案。如果我的秤给出的读数略微不同，我可以只取几个读数并取平均值。或者我可以换一个更准确的秤。但是当传感器的误差就是很大或者需要测量的环境使收集数据收集很困难时，我们该怎么办？比如，我们可能正试图追踪一个低空飞行器的运动。又比如我们想为无人机做一个自动驾驶仪，或者我们想用农用拖拉机播种，确保覆盖整个农田。我从事的是计算机视觉工作，我需要跟踪图像中的移动物体，但是计算机视觉算法会产生非常大的误差和不可靠的结果。
 
 In simple cases the solution is obvious. If my scale gives slightly different readings I can just take a few readings and average them. Or I can replace it with a more accurate scale. But what do we do when the sensor is very noisy, or the environment makes data collection difficult? We may be trying to track the movement of a low flying aircraft. We may want to create an autopilot for a drone, or ensure that our farm tractor seeded the entire field. I work on computer vision, and I need to track moving objects in images, and the computer vision algorithms create very noisy and unreliable results.
 
+
+本书教你如何解决这些问题。我使用了许多不同的算法，但它们都是基于贝叶斯概率的。简单来说，贝叶斯概率根据过去的信息来确定未来哪些可能是真实的。
+
 This book teaches you how to solve these sorts of filtering problems. I use many different algorithms, but they are all based on Bayesian probability. In simple terms Bayesian probability determines what is likely to be true based on past information.
+
+我来举个栗子，如果我此刻问你的车头朝哪个方向，你可能无法确定。你可以说出1到360度之间的数字，并且有1/360的机会是正确的。现在假设我告诉你，2秒前它的朝向为243∘∘。 并且在2秒内，我的车无法转得很远，那么你就可以做出更加准确的预测。你这就是在使用过去的信息来更准确地推断有关当前或未来的信息。
 
 If I asked you the heading of my car at this moment you would have no idea. You'd proffer a number between 1∘∘ and 360∘∘ degrees, and have a 1 in 360 chance of being right. Now suppose I told you that 2 seconds ago its heading was 243∘∘. In 2 seconds my car could not turn very far so you could make a far more accurate prediction. You are using past information to more accurately infer information about the present or future.
 
+真实世界同样充满噪声。预测可以帮助您做出更好的估算，但同时也会受到噪声的影响。我可能只是为了一条狗而踩刹车，或是在坑洞里转弯。路上的强风和冰对我车的轨迹产生外部影响。在相关文献中，我们都把这些叫做噪声，尽管你可能不会这样认为它们不是。
+
 The world is also noisy. That prediction helps you make a better estimate, but it also subject to noise. I may have just braked for a dog or swerved around a pothole. Strong winds and ice on the road are external influences on the path of my car. In control literature we call this noise though you may not think of it that way.
+
+贝叶斯概率有很多种，但你只需要了解主要的思想。知识是不确定的，我们需要根据正确的事实来不断改变我们的原有的认知。卡尔曼滤波器和贝叶斯滤波器将我们对噪声和传感器的局限性的系统行为的嘈杂和有限的知识融合在一起，以产生对系统状态的最佳估计。我们的原则是永远不要丢弃信息。
 
 There is more to Bayesian probability, but you have the main idea. Knowledge is uncertain, and we alter our beliefs based on the strength of the evidence. Kalman and Bayesian filters blend our noisy and limited knowledge of how a system behaves with the noisy and limited sensor readings to produce the best possible estimate of the state of the system. Our principle is to never discard information.
 
