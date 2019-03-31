@@ -1,6 +1,6 @@
 # [Kalman and Bayesian Filters in Python](https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python)
 
-本项目是Kalman and Bayesian Filters in Python(https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python)的中文翻译，本人也是在一遍学习一遍翻译，如有错误还请谅解，如有能力还是建议直接阅读原文。
+本项目是Kalman and Bayesian Filters in Python(https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python)的中文翻译，这本书以足够通俗易懂的方式来解释了卡尔曼滤波器等一众滤波器的原理，相比其他书中一下子列出一堆公式更容易理解一些，所以我打算尝试翻译这本书，也算是督促和巩固我的学习进度，如有翻译有误还请谅解，并直接修改提交，或者提issue，如果有能力还是建议直接阅读原文。
 
 本书主要介绍了卡尔曼和贝叶斯滤波器的原理和用法。文中的所有代码都是用Python编写的，本书本身是使用Juptyer Notebook编写的，因此您可以在浏览器中运行和修改代码。 还有什么比这更好的学习方法吗！
 
@@ -23,60 +23,41 @@
 -----
 
 所有的传感器都会带来噪声。我们所在的世界充满了我们想要测量的数据和跟踪事件，但我们不能依靠传感器来为我们提供完美的信息。我车里的GPS可以报告高度。每当我通过某条道路上的同一个地方的时候，它报告的高度总会略有不同。如果我用厨房里的秤称同一个物体称重两次，每次称的重量也会不同。
-Sensors are noisy. The world is full of data and events that we want to measure and track, but we cannot rely on sensors to give us perfect information. The GPS in my car reports altitude. Each time I pass the same point in the road it reports a slightly different altitude. My kitchen scale gives me different readings if I weigh the same object twice.
 
 在简单的情况下，有很简单的解决方案。如果我的秤给出的读数略微不同，我可以只取几个读数并取平均值。或者我可以换一个更准确的秤。但是当传感器的误差就是很大或者需要测量的环境使收集数据收集很困难时，我们该怎么办？比如，我们可能正试图追踪一个低空飞行器的运动。又比如我们想为无人机做一个自动驾驶仪，或者我们想用农用拖拉机播种，确保覆盖整个农田。我从事的是计算机视觉工作，我需要跟踪图像中的移动物体，但是计算机视觉算法会产生非常大的误差和不可靠的结果。
 
-In simple cases the solution is obvious. If my scale gives slightly different readings I can just take a few readings and average them. Or I can replace it with a more accurate scale. But what do we do when the sensor is very noisy, or the environment makes data collection difficult? We may be trying to track the movement of a low flying aircraft. We may want to create an autopilot for a drone, or ensure that our farm tractor seeded the entire field. I work on computer vision, and I need to track moving objects in images, and the computer vision algorithms create very noisy and unreliable results.
-
-
 本书教你如何解决这些问题。我使用了许多不同的算法，但它们都是基于贝叶斯概率的。简单来说，贝叶斯概率根据过去的信息来确定未来哪些可能是真实的。
-
-This book teaches you how to solve these sorts of filtering problems. I use many different algorithms, but they are all based on Bayesian probability. In simple terms Bayesian probability determines what is likely to be true based on past information.
 
 我来举个栗子，如果我此刻问你的车头朝哪个方向，你可能无法确定。你可以说出1到360度之间的数字，并且有1/360的机会是正确的。现在假设我告诉你，2秒前它的朝向为243∘∘。 并且在2秒内，我的车无法转得很远，那么你就可以做出更加准确的预测。你这就是在使用过去的信息来更准确地推断有关当前或未来的信息。
 
-If I asked you the heading of my car at this moment you would have no idea. You'd proffer a number between 1∘∘ and 360∘∘ degrees, and have a 1 in 360 chance of being right. Now suppose I told you that 2 seconds ago its heading was 243∘∘. In 2 seconds my car could not turn very far so you could make a far more accurate prediction. You are using past information to more accurately infer information about the present or future.
-
 真实世界同样充满噪声。预测可以帮助您做出更好的估算，但同时也会受到噪声的影响。我可能只是为了一条狗而踩刹车，或是在坑洞里转弯。路上的强风和冰对我车的轨迹产生外部影响。在相关文献中，我们都把这些叫做噪声，尽管你可能不会这样认为它们不是。
-
-The world is also noisy. That prediction helps you make a better estimate, but it also subject to noise. I may have just braked for a dog or swerved around a pothole. Strong winds and ice on the road are external influences on the path of my car. In control literature we call this noise though you may not think of it that way.
 
 贝叶斯概率有很多种，但你只需要了解主要的思想。知识是不确定的，我们需要根据正确的事实来不断改变我们的原有的认知。卡尔曼滤波器和贝叶斯滤波器将噪声、传感器有限的能力、和我们对含有噪声的系统所掌握的有限条件综合考虑在一起，产生对系统状态的最佳估计。我们的原则是永远不丢弃信息。
 
-There is more to Bayesian probability, but you have the main idea. Knowledge is uncertain, and we alter our beliefs based on the strength of the evidence. Kalman and Bayesian filters blend our noisy and limited knowledge of how a system behaves with the noisy and limited sensor readings to produce the best possible estimate of the state of the system. Our principle is to never discard information.
-
 假设我们正在跟踪一个物体，并且传感器报告它突然改变方向。它是真的转了，还是因为噪音数据？这需要视情况而定。如果这是一架喷气式战斗机，那我们更倾向于相信它是在突然机动的结论。如果是沿直线轨道运动的货运列车，我们需要折中考虑。我们将根据传感器的准确度来进一步修正我们的认知。我们的认知取决于过去的经验以及我们对所跟踪的系统的了解以及传感器的特性。
 
-Say we are tracking an object and a sensor reports that it suddenly changed direction. Did it really turn, or is the data noisy? It depends. If this is a jet fighter we'd be very inclined to believe the report of a sudden maneuver. If it is a freight train on a straight track we would discount it. We'd further modify our belief depending on how accurate the sensor is. Our beliefs depend on the past and on our knowledge of the system we are tracking and on the characteristics of the sensors.
-
 卡尔曼滤波器是由Rudolf Emil Kálmán发明的，他通过数学上最优方法来解决这类问题。它第一次的应用是阿波罗登月，从那以后它被用于各种各样的领域。在飞机，潜艇和巡航导弹上都有卡尔曼滤波器的使用。华尔街使用它来跟踪市场。它还用于机器人，IoT（物联网）传感器和实验室仪器。化工厂使用它来控制和监测反应。它也用于医学成像技术，去除心脏信号中的噪声。凡是涉及传感器和/或时间序列数据，通常都会涉及卡尔曼滤波器或与卡尔曼滤波器密切相关的其他滤波器。
-
-The Kalman filter was invented by Rudolf Emil Kálmán to solve this sort of problem in a mathematically optimal way. Its first use was on the Apollo missions to the moon, and since then it has been used in an enormous variety of domains. There are Kalman filters in aircraft, on submarines, and on cruise missiles. Wall street uses them to track the market. They are used in robots, in IoT (Internet of Things) sensors, and in laboratory instruments. Chemical plants use them to control and monitor reactions. They are used to perform medical imaging and to remove noise from cardiac signals. If it involves a sensor and/or time-series data, a Kalman filter or a close relative to the Kalman filter is usually involved.
 
 目的
 -----
 
 写作本书源于我希望能能对卡尔曼滤波做一个详细的介绍。我是一名软件工程师，在航空电子学领域从事了将近二十年的时间，所以我一直在用卡尔曼滤波器，但我自己从未实现过。当我开始用计算机视觉解决跟踪问题时，这种需求变得迫切。该领域有很多经典的教科书，如Grewal和Andrew写很棒的*卡尔曼过滤*。但是，如果你没有相关的背景知识，坐下来试图阅读这些书会让你感到十分的低落。通常，前几章将讲完需要好几年学习的本科基础数学知识，轻松地向您介绍微积分等内容，并在几个简短的段落中介绍完需要一整个学期的统计学。这些书是高年级本科课程很好的教材，也是相关研究人员和专业人士的宝贵的参考工具，但对于一般的读者而言，读起来确实很困难。引入的符号没有解释，不同的文献对同一个概念使用不同的术语和变量，而且书籍几乎没有例子或实际问题。我经常发现自己能够明白字面意思并理解所定义的数学公式，但却不知道他们到底描述的是现实世界中的什么现象。 “但是，这到底有什么*意义*？”我一度在思考。
 
-The motivation for this book came out of my desire for a gentle introduction to Kalman filtering. I'm a software engineer that spent almost two decades in the avionics field, and so I have always been 'bumping elbows' with the Kalman filter, but never implemented one myself. As I moved into solving tracking problems with computer vision the need became urgent. There are classic textbooks in the field, such as Grewal and Andrew's excellent *Kalman Filtering*. But sitting down and trying to read many of these books is a dismal experience if you do not have the required background. Typically the first few chapters fly through several years of undergraduate math, blithely referring you to textbooks on topics such as Itō calculus, and present an entire semester's worth of statistics in a few brief paragraphs. They are good texts for an upper undergraduate course, and an invaluable reference to researchers and professionals, but the going is truly difficult for the more casual reader. Symbology is introduced without explanation, different texts use different terms and variables for the same concept, and the books are almost devoid of examples or worked problems. I often found myself able to parse the words and comprehend the mathematics of a definition, but had no idea as to what real world phenomena they describe. "But what does that *mean?*" was my repeated thought.
+然而，当我最终理解卡尔曼滤波器时，我意识到其实它的基本概念非常简单。简单的概率规则，我们基于常识来解释日常生活中事件的直觉，以及卡尔曼滤波器的核心概念都是可以理解的。卡尔曼滤波器以困难著称，但由于缺少了许多正式的术语，主题和数学的美对我来说变得清晰，我爱上了这个课题。
 
-However, as I began to finally understand the Kalman filter I realized the underlying concepts are quite straightforward. A few simple probability rules, some intuition about how we integrate disparate knowledge to explain events in our everyday life and the core concepts of the Kalman filter are accessible. Kalman filters have a reputation for difficulty, but shorn of much of the formal terminology the beauty of the subject and of their math became clear to me, and I fell in love with the topic.
+当我开始理解数学和理论后，出现了更多的困难。一本书或一篇论文的作者作了一些事实的陈述，并提出了一个图表作为证据。不幸的是，我不清楚为什么这句话是真的，也不清楚如何证明它。或者我想知道“如果r=0，这是真的吗？”，或者作者在提供了十分精炼的伪代码，以至于实现起来并不容易。有些书提供matlab代码，但我没有使用这种昂贵软件包的许可证。最后，许多书在每章的最后提供了许多有用的练习。如果你想自己练习实现卡尔曼滤波器，你需要理解，但是这些练习没有答案。如果你在学校里用这些本书，也许这没有影响，但这对独立阅读者来说实在太可怕了。我讨厌作者对我隐瞒信息，大概是为了避免学生在课堂上作弊。
 
-As I began to understand the math and theory more difficulties present themselves. A book or paper's author makes some statement of fact and presents a graph as proof.  Unfortunately, why the statement is true is not clear to me, nor is the method for making that plot obvious. Or maybe I wonder "is this true if R=0?"  Or the author provides pseudocode at such a high level that the implementation is not obvious. Some books offer Matlab code, but I do not have a license to that expensive package. Finally, many books end each chapter with many useful exercises. Exercises which you need to understand if you want to implement Kalman filters for yourself, but exercises with no answers. If you are using the book in a classroom, perhaps this is okay, but it is terrible for the independent reader. I loathe that an author withholds information from me, presumably to avoid 'cheating' by the student in the classroom.
+在我看来，这些都不必要。当然，如果你在为飞机或导弹设计卡尔曼滤波器，你必须彻底掌握典型卡尔曼滤波器教科书中的所有数学理论。而我只想跟踪屏幕上的图像，或者为Arduino项目编写一些代码。我想知道书中的图像是如何制作的，并且尝试不同于作者选择的参数。我希望可以运行模拟。我想在信号中注入更多的噪声，看看滤波器是如何工作的。在日常编码中有成千上万的机会使用卡尔曼滤波器，然而那些最基础的理论还是让火箭科学家和学者来研究吧。
 
-From my point of view none of this necessary. Certainly if you are designing a Kalman filter for a aircraft or missile you must thoroughly master of all of the mathematics and topics in a typical Kalman filter textbook. I just want to track an image on a screen, or write some code for an Arduino project. I want to know how the plots in the book are made, and chose different parameters than the author chose. I want to run simulations. I want to inject more noise in the signal and see how a filter performs. There are thousands of opportunities for using Kalman filters in everyday code, and yet this fairly straightforward topic is the provenance of rocket scientists and academics.
+我写这本书就是为了满足所有这些需求。如果你为波音公司设计导航计算机或为雷神公司设计雷达，那这不是你想看的书。你需要去佐治亚理工大学、华盛顿大学或类似的地方攻读个高级的学位。这本书是为那些对这方面感兴趣、好奇和工作中需要过滤平滑数据的工程师准备的。
 
-I wrote this book to address all of those needs. This is not the book for you if you program navigation computers for Boeing or design radars for Raytheon. Go get an advanced degree at Georgia Tech, UW, or the like, because you'll need it. This book is for the hobbiest, the curious, and the working engineer that needs to filter or smooth data.
+这本书是交互式的。虽然您可以将它作为静态内容在线阅读，但我极力建议您有计划的使用它。它是使用Jupyter Notebook 编写的，它将文本、数学公式、python代码和python的输出组合在一个地方。本书中的每一个图、每一段数据都由python生成的，这些代码您都可以修改。想将参数的值加倍吗？单击python单元，更改参数的值，然后单击“运行”。新的绘图或打印输出就会出现在书中。
 
-This book is interactive. While you can read it online as static content, I urge you to use it as intended. It is written using Jupyter Notebook, which allows me to combine text, math, Python, and Python output in one place. Every plot, every piece of data in this book is generated from Python that is available to you right inside the notebook. Want to double the value of a parameter? Click on the Python cell, change the parameter's value, and click 'Run'. A new plot or printed output will appear in the book.
+这本书中有练习，但也有答案。我相信你。如果你只需要一个答案，你可以继续阅读答案。如果你想消化吸收这些知识，那么在阅读答案之前，请试着自己实现这些练习。
 
-This book has exercises, but it also has the answers. I trust you. If you just need an answer, go ahead and read the answer. If you want to internalize this knowledge, try to implement the exercise before you read the answer.
+这本书需要计算统计，绘制与过滤器相关的图，以及我们所涉及的各种过滤器的库。这确实要提醒一下；大多数代码是以教学目的而编写的。我很少选择最有效的解决方案（这样常常会掩盖了代码的原本意图），而且在书的第一部分，我并不关心数值稳定性。理解这一点很重要——飞机上的卡尔曼滤波器是经过精心设计和实现，所以在数值上是稳定的；在许多情况下，原始的实现并不稳定。如果你是认真的学习卡尔曼过滤器，那么这本书将不会是最后一本你需要的书。我的目的是向你们介绍概念和数学公式，并让你们能够理解教科书所表达的程度。
 
-This book has supporting libraries for computing statistics, plotting various things related to filters, and for the various filters that we cover. This does require a strong caveat; most of the code is written for didactic purposes. It is rare that I chose the most efficient solution (which often obscures the intent of the code), and in the first parts of the book I did not concern myself with numerical stability. This is important to understand - Kalman filters in aircraft are carefully designed and implemented to be numerically stable; the naive implementation is not stable in many cases. If you are serious about Kalman filters this book will not be the last book you need. My intention is to introduce you to the concepts and mathematics, and to get you to the point where the textbooks are approachable.
-
-Finally, this book is free. The cost for the books required to learn Kalman filtering is somewhat prohibitive even for a Silicon Valley engineer like myself; I cannot believe they are within the reach of someone in a depressed economy, or a financially struggling student. I have gained so much from free software like Python, and free books like those from Allen B. Downey [here](http://www.greenteapress.com/). It's time to repay that. So, the book is free, it is hosted on free servers, and it uses only free and open software such as IPython and mathjax to create the book.
-
+最后，这本书是免费的。即使对我这样的硅谷工程师来说，购买学习卡尔曼滤波器所需的书籍的成本也有点令人望而却步；我无法相信，这些书籍能让那些在经济能力不高或经济困难的学生买到。我从诸如python之类的免费软件和AllenB.Downey[这里](http://www.grenteapress.com/)的免费书籍中获益匪浅。是时候报答了。因此，这本书是免费的，它托管在免费的服务器上，并且它只使用免费和开放的软件，如ipython和mathjax来创建这本书。
 
 ## Reading Online
 
