@@ -1,6 +1,6 @@
 # [Kalman and Bayesian Filters in Python](https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python)
 
-本项目是Kalman and Bayesian Filters in Python(https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python)的中文翻译，这本书以足够通俗易懂的方式来解释了卡尔曼滤波器等一众滤波器的原理，相比其他书中一下子列出一堆公式更容易理解一些，所以我打算尝试翻译这本书，也算是督促和巩固我的学习进度，如有翻译有误还请谅解，并直接修改提交，或者提issue，如果有能力还是建议直接阅读原文。
+本项目是[Kalman and Bayesian Filters in Python](https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python)的中文翻译，这本书以足够通俗易懂的方式来解释了卡尔曼滤波器等一众滤波器的原理，相比其他书中一下子列出一堆公式更容易理解一些，所以我打算尝试翻译这本书，也算是督促和巩固我的学习进度，如有翻译有误还请谅解，并直接修改提交，或者提issue，如果有能力还是建议直接阅读原文。
 
 本书主要介绍了卡尔曼和贝叶斯滤波器的原理和用法。文中的所有代码都是用Python编写的，本书本身是使用Juptyer Notebook编写的，因此您可以在浏览器中运行和修改代码。 还有什么比这更好的学习方法吗！
 
