@@ -42,16 +42,22 @@ If I asked you the heading of my car at this moment you would have no idea. You'
 
 The world is also noisy. That prediction helps you make a better estimate, but it also subject to noise. I may have just braked for a dog or swerved around a pothole. Strong winds and ice on the road are external influences on the path of my car. In control literature we call this noise though you may not think of it that way.
 
-贝叶斯概率有很多种，但你只需要了解主要的思想。知识是不确定的，我们需要根据正确的事实来不断改变我们的原有的认知。卡尔曼滤波器和贝叶斯滤波器将我们对噪声和传感器的局限性的系统行为的嘈杂和有限的知识融合在一起，以产生对系统状态的最佳估计。我们的原则是永远不要丢弃信息。
+贝叶斯概率有很多种，但你只需要了解主要的思想。知识是不确定的，我们需要根据正确的事实来不断改变我们的原有的认知。卡尔曼滤波器和贝叶斯滤波器将噪声、传感器有限的能力、和我们对含有噪声的系统所掌握的有限条件综合考虑在一起，产生对系统状态的最佳估计。我们的原则是永远不丢弃信息。
 
 There is more to Bayesian probability, but you have the main idea. Knowledge is uncertain, and we alter our beliefs based on the strength of the evidence. Kalman and Bayesian filters blend our noisy and limited knowledge of how a system behaves with the noisy and limited sensor readings to produce the best possible estimate of the state of the system. Our principle is to never discard information.
 
+假设我们正在跟踪一个物体，并且传感器报告它突然改变方向。它是真的转了，还是因为噪音数据？这需要视情况而定。如果这是一架喷气式战斗机，那我们更倾向于相信它是在突然机动的结论。如果是沿直线轨道运动的货运列车，我们需要折中考虑。我们将根据传感器的准确度来进一步修正我们的认知。我们的认知取决于过去的经验以及我们对所跟踪的系统的了解以及传感器的特性。
+
 Say we are tracking an object and a sensor reports that it suddenly changed direction. Did it really turn, or is the data noisy? It depends. If this is a jet fighter we'd be very inclined to believe the report of a sudden maneuver. If it is a freight train on a straight track we would discount it. We'd further modify our belief depending on how accurate the sensor is. Our beliefs depend on the past and on our knowledge of the system we are tracking and on the characteristics of the sensors.
+
+卡尔曼滤波器是由Rudolf Emil Kálmán发明的，他通过数学上最优方法来解决这类问题。它第一次的应用是阿波罗登月，从那以后它被用于各种各样的领域。在飞机，潜艇和巡航导弹上都有卡尔曼滤波器的使用。华尔街使用它来跟踪市场。它还用于机器人，IoT（物联网）传感器和实验室仪器。化工厂使用它来控制和监测反应。它也用于医学成像技术，去除心脏信号中的噪声。凡是涉及传感器和/或时间序列数据，通常都会涉及卡尔曼滤波器或与卡尔曼滤波器密切相关的其他滤波器。
 
 The Kalman filter was invented by Rudolf Emil Kálmán to solve this sort of problem in a mathematically optimal way. Its first use was on the Apollo missions to the moon, and since then it has been used in an enormous variety of domains. There are Kalman filters in aircraft, on submarines, and on cruise missiles. Wall street uses them to track the market. They are used in robots, in IoT (Internet of Things) sensors, and in laboratory instruments. Chemical plants use them to control and monitor reactions. They are used to perform medical imaging and to remove noise from cardiac signals. If it involves a sensor and/or time-series data, a Kalman filter or a close relative to the Kalman filter is usually involved.
 
-Motivation
+目的
 -----
+
+写作本书源于我希望能能对卡尔曼滤波做一个详细的介绍。我是一名软件工程师，在航空电子学领域从事了将近二十年的时间，所以我一直在用卡尔曼滤波器，但我自己从未实现过。当我开始用计算机视觉解决跟踪问题时，这种需求变得迫切。该领域有很多经典的教科书，如Grewal和Andrew写很棒的*卡尔曼过滤*。但是，如果你没有相关的背景知识，坐下来试图阅读这些书会让你感到十分的低落。通常，前几章将讲完需要好几年学习的本科基础数学知识，轻松地向您介绍微积分等内容，并在几个简短的段落中介绍完需要一整个学期的统计学。这些书是高年级本科课程很好的教材，也是相关研究人员和专业人士的宝贵的参考工具，但对于一般的读者而言，读起来确实很困难。引入的符号没有解释，不同的文献对同一个概念使用不同的术语和变量，而且书籍几乎没有例子或实际问题。我经常发现自己能够明白字面意思并理解所定义的数学公式，但却不知道他们到底描述的是现实世界中的什么现象。 “但是，这到底有什么*意义*？”我一度在思考。
 
 The motivation for this book came out of my desire for a gentle introduction to Kalman filtering. I'm a software engineer that spent almost two decades in the avionics field, and so I have always been 'bumping elbows' with the Kalman filter, but never implemented one myself. As I moved into solving tracking problems with computer vision the need became urgent. There are classic textbooks in the field, such as Grewal and Andrew's excellent *Kalman Filtering*. But sitting down and trying to read many of these books is a dismal experience if you do not have the required background. Typically the first few chapters fly through several years of undergraduate math, blithely referring you to textbooks on topics such as Itō calculus, and present an entire semester's worth of statistics in a few brief paragraphs. They are good texts for an upper undergraduate course, and an invaluable reference to researchers and professionals, but the going is truly difficult for the more casual reader. Symbology is introduced without explanation, different texts use different terms and variables for the same concept, and the books are almost devoid of examples or worked problems. I often found myself able to parse the words and comprehend the mathematics of a definition, but had no idea as to what real world phenomena they describe. "But what does that *mean?*" was my repeated thought.
 
